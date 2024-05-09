@@ -1,10 +1,10 @@
-package com.artudev.firststeps;
+package com.example.firststeps;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class StartupTests {
+class FirstStepsApplicationTests {
 
 	@Test
 	void contextLoads() {
