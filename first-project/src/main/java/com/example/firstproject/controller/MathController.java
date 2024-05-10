@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@RequestMapping("/math")
 public class MathController {
 
     @RequestMapping(
@@ -43,6 +44,12 @@ public class MathController {
 
     public double convertToDouble(String stringNumber) {
         if (stringNumber == null) return 0d;
-        return Double.parseDouble(stringNumber);
+        stringNumber = stringNumber.replaceAll(",", ".");
+        if (isNumeric(stringNumber)) return Double.parseDouble(stringNumber);
+        return 0d;
+    }
+
+    public boolean isNumeric(String stringNumber) {
+        return stringNumber.matches("[-+]?[0-9]*\\.?[0-9]+");
     }
 }
