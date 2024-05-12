@@ -4,13 +4,25 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 public class ExceptionResponse implements Serializable {
-    private LocalDateTime date;
-    private String title;
+    private LocalDateTime timestamp;
+    private String message;
     private String details;
 
-    public ExceptionResponse(LocalDateTime date, String title, String details) {
-        this.date = date;
-        this.title = title;
+    public ExceptionResponse(LocalDateTime timestamp, String message, String details) {
+        this.timestamp = timestamp;
+        this.message = message;
         this.details = details;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public String getDetails() {
+        return details;
     }
 }
