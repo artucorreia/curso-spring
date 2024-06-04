@@ -2,15 +2,12 @@ spring:
   application:
     name: first-project
   datasource:
-    dbcp2:
-      driver-class-name: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://localhost:3306/rest_with_spring_boot?useTimezone=true&serverTimezone=UTC # url database
-      username: developer # user database
-      password: 123456 # user password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/rest_with_spring_boot?useTimezone=true&serverTimezone=UTC # url database
+    username: developer # user database
+    password: 123456 # user password
   jpa:
+    open-view: false
     hibernate:
       ddl-auto: update # https://stackoverflow.com/questions/438146/what-are-the-possible-values-of-the-hibernate-hbm2ddl-auto-configuration-and-wha
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect # especifica o dialeto do Hibernate para o banco de dados em uso
-      show-sql: false
+    show-sql: false

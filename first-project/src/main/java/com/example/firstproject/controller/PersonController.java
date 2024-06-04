@@ -9,51 +9,45 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/person")
+@RequestMapping(value = "/people")
 public class PersonController {
 
     @Autowired
     private PersonService personService;
 
-    @RequestMapping(
+    @GetMapping(
             value = "/{id}",
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    @GetMapping
-    public Person findById(@PathVariable(value = "id") String id) {
+    public Person findById(@PathVariable(value = "id") Long id) {
         return personService.findById(id);
     }
 
-    @RequestMapping(
+    @GetMapping(
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    @GetMapping
     public List<Person> findAll() {
         return personService.findAll();
     }
 
-    @RequestMapping(
+    @PostMapping(
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    @PostMapping
     public Person create(@RequestBody Person person) {
         return personService.create(person);
     }
 
-    @RequestMapping(
-            method = RequestMethod.PUT,
+    @PutMapping(
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-//    @PutMapping
     public Person update(@RequestBody Person person) {
         return personService.update(person);
     }
 
-    @RequestMapping(value = "/{id}")
     @DeleteMapping
-    public void delete(@PathVariable(value = "id") String id) {
+    public void delete(@RequestBody Long id) {
         personService.delete(id);
     }
 }

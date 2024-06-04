@@ -1,14 +1,27 @@
 package com.example.firstproject.model;
 
+import jakarta.persistence.*;
+
 import java.io.Serializable;
 import java.util.Objects;
 
+@Table
+@Entity(name = "PEOPLE")
 public class Person implements Serializable {
 
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "first_name", nullable = false, length = 200)
     private String firstName;
+
+    @Column(name = "last_name", nullable = false, length = 200)
     private String lastName;
+
+    @Column(name = "address", nullable = false, length = 200)
     private String address;
+
+    @Column(name = "gender", nullable = false, length = 8)
     private String gender;
 
     public Person() {}
@@ -66,7 +79,11 @@ public class Person implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Person person = (Person) o;
-        return Objects.equals(id, person.id) && Objects.equals(firstName, person.firstName) && Objects.equals(lastName, person.lastName) && Objects.equals(address, person.address) && Objects.equals(gender, person.gender);
+        return Objects.equals(id, person.id)
+                && Objects.equals(firstName, person.firstName)
+                && Objects.equals(lastName, person.lastName)
+                && Objects.equals(address, person.address)
+                && Objects.equals(gender, person.gender);
     }
 
     @Override
