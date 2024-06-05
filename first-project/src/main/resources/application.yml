@@ -7,7 +7,7 @@ spring:
     username: developer # user database
     password: 123456 # user password
   jpa:
-    open-view: false
+    open-in-view: false
     hibernate:
       ddl-auto: update # https://stackoverflow.com/questions/438146/what-are-the-possible-values-of-the-hibernate-hbm2ddl-auto-configuration-and-wha
     show-sql: false

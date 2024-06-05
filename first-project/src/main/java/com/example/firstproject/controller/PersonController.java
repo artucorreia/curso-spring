@@ -1,9 +1,10 @@
 package com.example.firstproject.controller;
 
-import com.example.firstproject.model.Person;
+import com.example.firstproject.data.DTO.v1.PersonDTO;
 import com.example.firstproject.services.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,14 +20,24 @@ public class PersonController {
             value = "/{id}",
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public Person findById(@PathVariable(value = "id") Long id) {
+    public PersonDTO findById(@PathVariable(value = "id") Long id) {
         return personService.findById(id);
+    }
+
+    @GetMapping(
+            value = "/find",
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public List<PersonDTO> findByFirstName(
+            @RequestParam(name = "firstName", value = "firstName", defaultValue = "") String firstName
+    ) {
+        return personService.findByFirstName(firstName);
     }
 
     @GetMapping(
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public List<Person> findAll() {
+    public List<PersonDTO> findAll() {
         return personService.findAll();
     }
 
@@ -34,7 +45,7 @@ public class PersonController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public Person create(@RequestBody Person person) {
+    public PersonDTO create(@RequestBody PersonDTO person) {
         return personService.create(person);
     }
 
@@ -42,12 +53,13 @@ public class PersonController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public Person update(@RequestBody Person person) {
+    public PersonDTO update(@RequestBody PersonDTO person) {
         return personService.update(person);
     }
 
-    @DeleteMapping
-    public void delete(@RequestBody Long id) {
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity<?> delete(@PathVariable(value = "id") Long id) {
         personService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }
