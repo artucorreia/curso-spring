@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 @Table
-@Entity(name = "PEOPLE")
+@Entity(name = "people")
 public class Person implements Serializable {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,14 +24,26 @@ public class Person implements Serializable {
     @Column(name = "gender", nullable = false, length = 8)
     private String gender;
 
+    @ManyToOne @JoinColumn(name = "occupation_id", referencedColumnName = "id")
+    private Occupation occupation;
+
     public Person() {}
 
-    public Person(Long id, String firstName, String lastName, String address, String gender) {
+
+    public Person(
+            Long id,
+            String firstName,
+            String lastName,
+            String address,
+            String gender,
+            Occupation occupation
+    ) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.address = address;
         this.gender = gender;
+        this.occupation = occupation;
     }
 
     public Long getId() {
@@ -74,6 +86,14 @@ public class Person implements Serializable {
         this.gender = gender;
     }
 
+    public Occupation getOccupation() {
+        return occupation;
+    }
+
+    public void setOccupation(Occupation occupation) {
+        this.occupation = occupation;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -83,11 +103,12 @@ public class Person implements Serializable {
                 && Objects.equals(firstName, person.firstName)
                 && Objects.equals(lastName, person.lastName)
                 && Objects.equals(address, person.address)
-                && Objects.equals(gender, person.gender);
+                && Objects.equals(gender, person.gender)
+                && Objects.equals(occupation, person.occupation);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, firstName, lastName, address, gender);
+        return Objects.hash(id, firstName, lastName, address, gender, occupation);
     }
 }
