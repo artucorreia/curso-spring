@@ -1,10 +1,8 @@
 package com.example.firstproject.services;
 
-import com.example.firstproject.data.DTO.v1.OccupationDTO;
 import com.example.firstproject.data.DTO.v1.PersonDTO;
 import com.example.firstproject.exceptions.ResourceNotFoundException;
 import com.example.firstproject.mapper.Mapper;
-import com.example.firstproject.model.Occupation;
 import com.example.firstproject.model.Person;
 import com.example.firstproject.repositories.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +17,6 @@ public class PersonService {
 
     @Autowired
     PersonRepository repository;
-
-    @Autowired
-    OccupationService occupationService;
 
     public PersonDTO findById(Long id) {
         logger.info("Finding one person");
@@ -49,12 +44,8 @@ public class PersonService {
 
     public PersonDTO create(PersonDTO person) {
         logger.info("Creating one person");
-        OccupationDTO occupationDTO = occupationService.findById(person.getOccupation().getId());
-        person.setOccupation(occupationDTO);
 
         Person entity = Mapper.parseObject(person, Person.class);
-//        logger.info(entity.toString());
-//        logger.info(occupationDTO.toString());
 
         return Mapper.parseObject(repository.save(entity), PersonDTO.class);
     }

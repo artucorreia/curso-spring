@@ -24,9 +24,6 @@ public class Person implements Serializable {
     @Column(name = "gender", nullable = false, length = 8)
     private String gender;
 
-    @ManyToOne @JoinColumn(name = "occupation_id", referencedColumnName = "id")
-    private Occupation occupation;
-
     public Person() {}
 
 
@@ -35,15 +32,13 @@ public class Person implements Serializable {
             String firstName,
             String lastName,
             String address,
-            String gender,
-            Occupation occupation
+            String gender
     ) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.address = address;
         this.gender = gender;
-        this.occupation = occupation;
     }
 
     public Long getId() {
@@ -86,29 +81,16 @@ public class Person implements Serializable {
         this.gender = gender;
     }
 
-    public Occupation getOccupation() {
-        return occupation;
-    }
-
-    public void setOccupation(Occupation occupation) {
-        this.occupation = occupation;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Person person = (Person) o;
-        return Objects.equals(id, person.id)
-                && Objects.equals(firstName, person.firstName)
-                && Objects.equals(lastName, person.lastName)
-                && Objects.equals(address, person.address)
-                && Objects.equals(gender, person.gender)
-                && Objects.equals(occupation, person.occupation);
+        return Objects.equals(id, person.id) && Objects.equals(firstName, person.firstName) && Objects.equals(lastName, person.lastName) && Objects.equals(address, person.address) && Objects.equals(gender, person.gender);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, firstName, lastName, address, gender, occupation);
+        return Objects.hash(id, firstName, lastName, address, gender);
     }
 }
