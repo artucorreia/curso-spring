@@ -1,5 +1,6 @@
 package com.example.firstproject.services;
 
+import com.example.firstproject.controller.PersonController;
 import com.example.firstproject.data.DTO.v1.PersonDTO;
 import com.example.firstproject.exceptions.ResourceNotFoundException;
 import com.example.firstproject.mapper.Mapper;
@@ -11,6 +12,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.logging.Logger;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 @Service
 public class PersonService {
     private final Logger logger = Logger.getLogger(PersonService.class.getName());
@@ -21,46 +25,87 @@ public class PersonService {
     public PersonDTO findById(Long id) {
         logger.info("Finding one person");
 
-        return Mapper.parseObject(
+        PersonDTO person = Mapper.parseObject(
                 repository.findById(id)
                 .orElseThrow(
                     () -> new ResourceNotFoundException("No records found for this id")
                 ),
                 PersonDTO.class
         );
+
+        // HATEOAS
+        person.add(
+                linkTo(
+                        methodOn(PersonController.class).findById(person.getId())
+                ).withSelfRel()
+        );
+        person.add(
+                linkTo(
+                        methodOn(PersonController.class).findAll()
+                ).withRel("people")
+        );
+        return person;
     }
 
     public List<PersonDTO> findByFirstName(String firstName) {
         logger.info("Finding one person");
 
-        return Mapper.parseListObjects(repository.findByFirstName(firstName), PersonDTO.class);
+        List<PersonDTO> people = Mapper.parseListObjects(repository.findByFirstName(firstName), PersonDTO.class);
+
+        // HATEOAS
+        return people.stream().map(
+                person -> person.add(
+                        linkTo(
+                                methodOn(PersonController.class).findById(person.getId())
+                        ).withSelfRel()
+                )
+        ).toList();
     }
 
     public List<PersonDTO> findAll() {
         logger.info("Finding all persons");
 
-        return Mapper.parseListObjects(repository.findAll(), PersonDTO.class);
+        List<PersonDTO> people = Mapper.parseListObjects(repository.findAll(), PersonDTO.class);
+
+        // HATEOAS
+        return people.stream().map(
+                person -> person.add(
+                        linkTo(
+                                methodOn(PersonController.class).findById(person.getId())
+                        ).withSelfRel()
+                )
+        ).toList();
     }
 
-    public PersonDTO create(PersonDTO person) {
+    public PersonDTO create(PersonDTO personDTO) {
         logger.info("Creating one person");
 
-        Person entity = Mapper.parseObject(person, Person.class);
+        Person entity = Mapper.parseObject(personDTO, Person.class);
 
-        return Mapper.parseObject(repository.save(entity), PersonDTO.class);
+        PersonDTO person = Mapper.parseObject(repository.save(entity), PersonDTO.class);
+
+        // HATEOAS
+        person.add(linkTo(methodOn(PersonController.class).findById(person.getId())).withSelfRel());
+        person.add(linkTo(methodOn(PersonController.class).findAll()).withRel("people"));
+        return person;
     }
 
-    public PersonDTO update(PersonDTO person) {
+    public PersonDTO update(PersonDTO personDTO) {
         logger.info("Updating one person");
 
-        Person entity = Mapper.parseObject(findById(person.getId()), Person.class);
+        Person entity = Mapper.parseObject(findById(personDTO.getId()), Person.class);
 
-        entity.setFirstName(person.getFirstName());
-        entity.setLastName(person.getLastName());
-        entity.setAddress(person.getAddress());
-        entity.setGender(person.getGender());
+        entity.setFirstName(personDTO.getFirstName());
+        entity.setLastName(personDTO.getLastName());
+        entity.setAddress(personDTO.getAddress());
+        entity.setGender(personDTO.getGender());
 
-        return Mapper.parseObject(repository.save(entity), PersonDTO.class);
+        PersonDTO person = Mapper.parseObject(repository.save(entity), PersonDTO.class);
+
+        // HATEOAS
+        person.add(linkTo(methodOn(PersonController.class).findById(person.getId())).withSelfRel());
+        person.add(linkTo(methodOn(PersonController.class).findAll()).withRel("people"));
+        return person;
     }
 
     public void delete(Long id) {
