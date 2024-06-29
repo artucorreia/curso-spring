@@ -20,7 +20,7 @@ public class PersonService {
     private final Logger logger = Logger.getLogger(PersonService.class.getName());
 
     @Autowired
-    PersonRepository repository;
+    private PersonRepository repository;
 
     public PersonDTO findById(Long id) {
         logger.info("Finding one person");

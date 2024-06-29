@@ -4,13 +4,9 @@ import org.springframework.hateoas.RepresentationModel;
 
 public class PersonDTO extends RepresentationModel<PersonDTO> {
     private Long id;
-
     private String firstName;
-
     private String lastName;
-
     private String address;
-
     private String gender;
 
     public PersonDTO() {}
