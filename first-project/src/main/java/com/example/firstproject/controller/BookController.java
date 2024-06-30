@@ -24,6 +24,7 @@ public class BookController {
     @Autowired
     private BookService service;
 
+    @CrossOrigin(origins = {"http://localhost8080", "http://localhost4200"})
     @GetMapping(
             value = "/{id}",
             produces = {
@@ -71,6 +72,7 @@ public class BookController {
         return service.findById(id);
     }
 
+    @CrossOrigin(origins = "http://localhost8080")
     @GetMapping(
             produces = {
                     MediaType.APPLICATION_JSON_VALUE,
@@ -117,6 +119,7 @@ public class BookController {
         return service.findAll();
     }
 
+    @CrossOrigin(origins = {"http://localhost8080", "http://localhost4200"})
     @PostMapping(
             consumes = {
                     MediaType.APPLICATION_JSON_VALUE,
