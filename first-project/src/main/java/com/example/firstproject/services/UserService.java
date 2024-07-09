@@ -20,6 +20,7 @@ public class UserService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         logger.info(String.format("Finding one user by name %s!", username));
+
         User user = repository.findByUserName(username);
         if (user == null) {
             throw new UsernameNotFoundException(String.format("Username %s not found!", username));
