@@ -2,181 +2,110 @@ package com.example.firstproject.model;
 
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
 @Entity
 @Table(name = "users")
-public class User implements UserDetails, Serializable {
+public class User implements UserDetails {
 
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private Integer id;
 
-    @Column(name = "user_name", nullable = false, unique = true)
-    private String userName;
+    @Column(length = 150, nullable = false, unique = true)
+    private String login;
 
-    @Column(name = "full_name")
-    private String fullName;
-
-    @Column
+    @Column(length = 100, nullable = false)
     private String password;
 
-    @Column(name = "account_non_expired")
-    private Boolean accountNonExpired;
-
-    @Column(name = "account_non_locked")
-    private Boolean accountNonLocked;
-
-    @Column(name = "credentials_non_expired")
-    private Boolean credentialsNonExpired;
-
-    @Column
-    private Boolean enabled;
-
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "user_permission",
-            joinColumns = @JoinColumn(name = "id_user"),
-            inverseJoinColumns = @JoinColumn(name = "id_permission")
-    )
-    private List<Permission> permissions;
-
-    public List<String> getRoles() {
-        List<String> roles = new ArrayList<>();
-        for(Permission permission : permissions) {
-            roles.add(permission.getDescription());
-        }
-        return roles;
-    }
+    private Role role;
 
     public User() {}
 
-    public User(
-            Long id,
-            String userName,
-            String fullName,
-            String password,
-            Boolean accountNonExpired,
-            Boolean accountNonLocked,
-            Boolean credentialsNonExpired,
-            Boolean enabled
-    ) {
-        this.id = id;
-        this.userName = userName;
-        this.fullName = fullName;
+    public User(String login, String password, Role role) {
+        this.login = login;
         this.password = password;
-        this.accountNonExpired = accountNonExpired;
-        this.accountNonLocked = accountNonLocked;
-        this.credentialsNonExpired = credentialsNonExpired;
-        this.enabled = enabled;
+        this.role = role;
+    }
+
+    public User(Integer id, String login, String password, Role role) {
+        this.id = id;
+        this.login = login;
+        this.password = password;
+        this.role = role;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return this.permissions;
+        if (role == Role.ADMIN) {
+            return List.of(
+                    new SimpleGrantedAuthority("ROLE_ADMIN"),
+                    new SimpleGrantedAuthority("ROLE_USER")
+            );
+        }
+        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
     }
 
     @Override
     public String getPassword() {
-        return this.password;
+        return password;
     }
 
     @Override
     public String getUsername() {
-        return this.userName;
+        return login;
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return this.accountNonExpired;
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return this.accountNonLocked;
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return this.credentialsNonExpired;
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return this.enabled;
+        return true;
     }
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
-    public String getUserName() {
-        return userName;
+    public String getLogin() {
+        return login;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
+    public void setLogin(String login) {
+        this.login = login;
     }
 
     public void setPassword(String password) {
         this.password = password;
     }
 
-    public Boolean getAccountNonExpired() {
-        return accountNonExpired;
+    public Role getRole() {
+        return role;
     }
 
-    public void setAccountNonExpired(Boolean accountNonExpired) {
-        this.accountNonExpired = accountNonExpired;
-    }
-
-    public Boolean getAccountNonLocked() {
-        return accountNonLocked;
-    }
-
-    public void setAccountNonLocked(Boolean accountNonLocked) {
-        this.accountNonLocked = accountNonLocked;
-    }
-
-    public Boolean getCredentialsNonExpired() {
-        return credentialsNonExpired;
-    }
-
-    public void setCredentialsNonExpired(Boolean credentialsNonExpired) {
-        this.credentialsNonExpired = credentialsNonExpired;
-    }
-
-    public Boolean getEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(Boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    public List<Permission> getPermissions() {
-        return permissions;
-    }
-
-    public void setPermissions(List<Permission> permissions) {
-        this.permissions = permissions;
+    public void setRole(Role role) {
+        this.role = role;
     }
 
     @Override
@@ -185,18 +114,13 @@ public class User implements UserDetails, Serializable {
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
         return Objects.equals(id, user.id)
-                && Objects.equals(userName, user.userName)
-                && Objects.equals(fullName, user.fullName)
+                && Objects.equals(login, user.login)
                 && Objects.equals(password, user.password)
-                && Objects.equals(accountNonExpired, user.accountNonExpired)
-                && Objects.equals(accountNonLocked, user.accountNonLocked)
-                && Objects.equals(credentialsNonExpired, user.credentialsNonExpired)
-                && Objects.equals(enabled, user.enabled)
-                && Objects.equals(permissions, user.permissions);
+                && role == user.role;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, userName, fullName, password, accountNonExpired, accountNonLocked, credentialsNonExpired, enabled, permissions);
+        return Objects.hash(id, login, password, role);
     }
 }
