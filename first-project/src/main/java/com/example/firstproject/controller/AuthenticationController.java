@@ -3,11 +3,13 @@ package com.example.firstproject.controller;
 import com.example.firstproject.data.DTO.v1.AuthenticationDTO;
 import com.example.firstproject.data.DTO.v1.RegisterDTO;
 import com.example.firstproject.data.DTO.v1.TokenDTO;
+import com.example.firstproject.data.DTO.v1.UserDTO;
 import com.example.firstproject.model.User;
 import com.example.firstproject.services.TokenService;
 import com.example.firstproject.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,21 +33,20 @@ public class AuthenticationController {
     private TokenService tokenService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody @Valid AuthenticationDTO data) {
-        UsernamePasswordAuthenticationToken usernamePassword = new UsernamePasswordAuthenticationToken(data.getLogin(), data.getPassword());
+    public ResponseEntity<TokenDTO> login(@RequestBody @Valid AuthenticationDTO data) {
+        UsernamePasswordAuthenticationToken usernamePassword =
+                new UsernamePasswordAuthenticationToken(data.getLogin(), data.getPassword());
         Authentication auth = this.authenticationManager.authenticate(usernamePassword);
 
-        String token = tokenService.generateToken((User) auth.getPrincipal());
+        TokenDTO token = tokenService.generateToken((User) auth.getPrincipal());
 
-        return ResponseEntity.ok(new TokenDTO(token));
+        return ResponseEntity.ok(token);
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody @Valid RegisterDTO data) {
+    public ResponseEntity<UserDTO> register(@RequestBody @Valid RegisterDTO data) {
         if (userService.findByLogin(data.getLogin()) != null) return ResponseEntity.badRequest().build();
 
-        userService.register(data);
-
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.register(data));
     }
 }
