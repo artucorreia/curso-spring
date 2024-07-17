@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.*;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -162,8 +163,15 @@ public class PersonController {
                     MediaType.APPLICATION_XML_VALUE
             }
     )
-    public List<PersonDTO> findAll() {
-        return service.findAll();
+    public ResponseEntity<Page<PersonDTO>> findAll(
+            @RequestParam(value = "page", defaultValue = "0") Integer page,
+            @RequestParam(value = "limit", defaultValue = "10") Integer limit,
+            @RequestParam(value = "direction", defaultValue = "asc") String direction
+    ) {
+        Sort.Direction sortDirection =
+                "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, limit, Sort.by(sortDirection, "birthdate"));
+        return ResponseEntity.ok(service.findAll(pageable));
     }
 
     @PostMapping(
@@ -250,6 +258,21 @@ public class PersonController {
     )
     public PersonDTO update(@RequestBody PersonDTO person) {
         return service.update(person);
+    }
+
+    @PatchMapping(
+            value = "/{id}",
+            consumes = {
+                    MediaType.APPLICATION_JSON_VALUE,
+                    MediaType.APPLICATION_XML_VALUE
+            },
+            produces = {
+                    MediaType.APPLICATION_JSON_VALUE,
+                    MediaType.APPLICATION_XML_VALUE
+            }
+    )
+    public PersonDTO update(@PathVariable Long id, @RequestBody PersonDTO person) {
+        return service.partiallyUpdate(id, person);
     }
 
     @DeleteMapping(value = "/{id}")

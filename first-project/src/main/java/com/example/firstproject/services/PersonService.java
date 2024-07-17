@@ -7,9 +7,12 @@ import com.example.firstproject.mapper.Mapper;
 import com.example.firstproject.model.Person;
 import com.example.firstproject.repositories.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Logger;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -39,11 +42,6 @@ public class PersonService {
                         methodOn(PersonController.class).findById(person.getId())
                 ).withSelfRel()
         );
-        person.add(
-                linkTo(
-                        methodOn(PersonController.class).findAll()
-                ).withRel("people")
-        );
         return person;
     }
 
@@ -62,19 +60,21 @@ public class PersonService {
         ).toList();
     }
 
-    public List<PersonDTO> findAll() {
+    public Page<PersonDTO> findAll(Pageable pageable) {
         logger.info("Finding all persons");
 
-        List<PersonDTO> people = Mapper.parseListObjects(repository.findAll(), PersonDTO.class);
+        Page<Person> entities = repository.findAll(pageable);
+
+        Page<PersonDTO> peopleDTO = entities.map(person -> Mapper.parseObject(person, PersonDTO.class));
 
         // HATEOAS
-        return people.stream().map(
-                person -> person.add(
+        return peopleDTO.map(
+                personDTO -> personDTO.add(
                         linkTo(
-                                methodOn(PersonController.class).findById(person.getId())
+                                methodOn(PersonController.class).findById(personDTO.getId())
                         ).withSelfRel()
                 )
-        ).toList();
+        );
     }
 
     public PersonDTO create(PersonDTO personDTO) {
@@ -86,7 +86,6 @@ public class PersonService {
 
         // HATEOAS
         person.add(linkTo(methodOn(PersonController.class).findById(person.getId())).withSelfRel());
-        person.add(linkTo(methodOn(PersonController.class).findAll()).withRel("people"));
         return person;
     }
 
@@ -104,8 +103,48 @@ public class PersonService {
 
         // HATEOAS
         person.add(linkTo(methodOn(PersonController.class).findById(person.getId())).withSelfRel());
-        person.add(linkTo(methodOn(PersonController.class).findAll()).withRel("people"));
         return person;
+    }
+
+    public PersonDTO partiallyUpdate(Long id, PersonDTO personDTO) {
+        Person entity = Mapper.parseObject(findById(id), Person.class);
+
+        if (
+            personDTO.getFirstName() != null &&
+            !Objects.equals(personDTO.getFirstName(), entity.getFirstName())
+        ) {
+            entity.setFirstName(personDTO.getFirstName());
+        }
+
+        if (
+            personDTO.getLastName() != null &&
+            !Objects.equals(personDTO.getLastName(), entity.getLastName())
+        ) {
+            entity.setLastName(personDTO.getLastName());
+        }
+
+        if (
+            personDTO.getGender() != null &&
+            !Objects.equals(personDTO.getGender(), entity.getGender())
+        ) {
+            entity.setGender(personDTO.getGender());
+        }
+
+        if (
+            personDTO.getEnabled() != null &&
+            !Objects.equals(personDTO.getEnabled(), entity.getEnabled())
+        ) {
+            entity.setEnabled(personDTO.getEnabled());
+        }
+
+        if (
+            personDTO.getAddress() != null &&
+            !Objects.equals(personDTO.getAddress(), entity.getAddress())
+        ) {
+            entity.setAddress(personDTO.getAddress());
+        }
+
+        return Mapper.parseObject(repository.save(entity), PersonDTO.class);
     }
 
     public void delete(Long id) {
