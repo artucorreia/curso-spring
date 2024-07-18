@@ -7,6 +7,11 @@ import com.example.firstproject.mapper.Mapper;
 import com.example.firstproject.model.Book;
 import com.example.firstproject.repositories.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,6 +27,9 @@ public class BookService {
     @Autowired
     private BookRepository repository;
 
+    @Autowired
+    private PagedResourcesAssembler<BookDTO> assembler;
+
     public BookDTO findById(Integer id) {
         logger.info("Finding one book");
 
@@ -34,23 +42,31 @@ public class BookService {
         );
 
         book.add(linkTo(methodOn(BookController.class).findById(book.getId())).withSelfRel());
-        book.add(linkTo(methodOn(BookController.class).findAll()).withRel("books"));
 
         return book;
     }
 
-    public List<BookDTO> findAll() {
+    public PagedModel<EntityModel<BookDTO>> findAll(Pageable pageable) {
         logger.info("Finding all books");
 
-        List<BookDTO> books = Mapper.parseListObjects(repository.findAll(), BookDTO.class);
+        Page<Book> entities = repository.findAll(pageable);
 
-        return books.stream().map(
-            bookDTO -> bookDTO.add(
-                linkTo(
-                    methodOn(BookController.class).findById(bookDTO.getId())
-                ).withSelfRel()
-            )
-        ).toList();
+        Page<BookDTO> books = entities.map(entity -> Mapper.parseObject(entity, BookDTO.class));
+
+        // HATEOAS dos objetos
+        books.map(
+                book -> book.add(
+                        linkTo(
+                                methodOn(BookController.class)
+                        ).withSelfRel()
+                )
+        );
+
+        // HATEOAS da page
+        return assembler.toModel(
+                books,
+                linkTo(methodOn(BookController.class)).withSelfRel()
+        );
     }
 
     public BookDTO create(BookDTO newBook) {
@@ -60,7 +76,6 @@ public class BookService {
         BookDTO bookDTO = Mapper.parseObject(repository.save(entity), BookDTO.class);
 
         bookDTO.add(linkTo(methodOn(BookController.class).findById(bookDTO.getId())).withSelfRel());
-        bookDTO.add(linkTo(methodOn(BookController.class).findAll()).withRel("books"));
 
         return bookDTO;
     }
@@ -79,7 +94,6 @@ public class BookService {
         BookDTO book = Mapper.parseObject(repository.save(entity), BookDTO.class);
 
         book.add(linkTo(methodOn(BookController.class).findById(book.getId())).withSelfRel());
-        book.add(linkTo(methodOn(BookController.class).findAll()).withRel("books"));
 
         return book;
     }

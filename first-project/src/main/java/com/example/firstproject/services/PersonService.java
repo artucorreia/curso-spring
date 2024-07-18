@@ -9,6 +9,10 @@ import com.example.firstproject.repositories.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,6 +28,9 @@ public class PersonService {
 
     @Autowired
     private PersonRepository repository;
+
+    @Autowired
+    private PagedResourcesAssembler<PersonDTO> assembler;
 
     public PersonDTO findById(Long id) {
         logger.info("Finding one person");
@@ -45,22 +52,36 @@ public class PersonService {
         return person;
     }
 
-    public List<PersonDTO> findByFirstName(String firstName) {
+    public PagedModel<EntityModel<PersonDTO>> findPeopleByFirstName(String firstName, Pageable pageable) {
         logger.info("Finding one person");
 
-        List<PersonDTO> people = Mapper.parseListObjects(repository.findByFirstName(firstName), PersonDTO.class);
+        Page<Person> entities = repository.findPeopleByFirstName(firstName, pageable);
+
+        Page<PersonDTO> people = entities.map(
+                person -> Mapper.parseObject(person, PersonDTO.class)
+        );
 
         // HATEOAS
-        return people.stream().map(
+        people.map(
                 person -> person.add(
                         linkTo(
                                 methodOn(PersonController.class).findById(person.getId())
                         ).withSelfRel()
                 )
-        ).toList();
+        );
+
+        return assembler.toModel(
+                people,
+                linkTo(methodOn(PersonController.class)
+                        .findAll(
+                                pageable.getPageNumber(),
+                                pageable.getPageSize(),
+                                "asc"
+                        )).withSelfRel()
+        );
     }
 
-    public Page<PersonDTO> findAll(Pageable pageable) {
+    public PagedModel<EntityModel<PersonDTO>> findAll(Pageable pageable) {
         logger.info("Finding all persons");
 
         Page<Person> entities = repository.findAll(pageable);
@@ -68,12 +89,22 @@ public class PersonService {
         Page<PersonDTO> peopleDTO = entities.map(person -> Mapper.parseObject(person, PersonDTO.class));
 
         // HATEOAS
-        return peopleDTO.map(
+        peopleDTO.map(
                 personDTO -> personDTO.add(
                         linkTo(
                                 methodOn(PersonController.class).findById(personDTO.getId())
                         ).withSelfRel()
                 )
+        );
+
+        return assembler.toModel(
+                peopleDTO,
+                linkTo(methodOn(PersonController.class)
+                        .findAll(
+                                pageable.getPageNumber(),
+                                pageable.getPageSize(),
+                                pageable.getSort().toString()
+                        )).withSelfRel()
         );
     }
 
