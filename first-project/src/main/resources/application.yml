@@ -1,3 +1,5 @@
+file:
+  upload-dir: /code/upload
 security:
   jwt:
     token:
@@ -15,6 +17,12 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: false
+  servlet:
+    multipart:
+      enabled: true
+      file-size-threshold: 2KB
+      max-file-size: 200MB
+      max-request-size: 215MB
 spring-doc:
   pathsToMatch:
     - /auth/**
